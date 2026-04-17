@@ -4,6 +4,24 @@ import nltk
 from nltk.stem import  PorterStemmer
 from nltk.corpus import stopwords
 import string
+
+
+def ensure_nltk_data():
+    # Download required tokenization/corpus resources if unavailable.
+    resources = [
+        ("tokenizers/punkt", "punkt"),
+        ("corpora/stopwords", "stopwords"),
+    ]
+    for resource_path, resource_name in resources:
+        try:
+            nltk.data.find(resource_path)
+        except LookupError:
+            nltk.download(resource_name, quiet=True)
+
+
+ensure_nltk_data()
+STOP_WORDS = set(stopwords.words('english'))
+
 ps = PorterStemmer()
 
 
@@ -19,7 +37,7 @@ def transform_text(text):
     y.clear()
 
     for i in text:
-        if i not in stopwords.words('english') and i not in string.punctuation:
+        if i not in STOP_WORDS and i not in string.punctuation:
             y.append(i)
 
     text = y[:]
