@@ -3,6 +3,7 @@ import pickle
 import nltk
 from nltk.stem import  PorterStemmer
 from nltk.corpus import stopwords
+from nltk.tokenize import wordpunct_tokenize
 import string
 
 
@@ -10,6 +11,7 @@ def ensure_nltk_data():
     # Download required tokenization/corpus resources if unavailable.
     resources = [
         ("tokenizers/punkt", "punkt"),
+        ("tokenizers/punkt_tab", "punkt_tab"),
         ("corpora/stopwords", "stopwords"),
     ]
     for resource_path, resource_name in resources:
@@ -27,7 +29,17 @@ ps = PorterStemmer()
 
 def transform_text(text):
     text = text.lower()
-    text = nltk.word_tokenize(text)
+    try:
+        text = nltk.word_tokenize(text)
+    except LookupError:
+        # Newer NLTK releases may require punkt_tab at runtime.
+        nltk.download('punkt', quiet=True)
+        nltk.download('punkt_tab', quiet=True)
+        try:
+            text = nltk.word_tokenize(text)
+        except LookupError:
+            # Keep app functional if tokenizer data cannot be downloaded.
+            text = wordpunct_tokenize(text)
     y= []
     for i in text:
         if i.isalnum():
